@@ -25,13 +25,7 @@ def main():
         return
 
     while True:
-        print('\n=== JSON Bible App ===')
-        print('[1] Search Verse')
-        print('[2] Add Bookmark (manual)')
-        print('[3] View / Remove Bookmarks')
-        print('[4] Verse of the Day')
-        print('[5] Search History')
-        print('[6] Exit')
+       
 
         choice = input('Enter choice: ').strip()
         if choice == '1':
