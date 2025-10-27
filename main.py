@@ -31,7 +31,7 @@ def main():
         print('[3] View / Remove Bookmarks')
         print('[4] Verse of the Day')
         print('[5] Search History')
-     
+        print('[6] Exit')
 
         choice = input('Enter choice: ').strip()
         if choice == '1':
