@@ -13,9 +13,8 @@ from collections import OrderedDict
 # JSON file for saving bookmarks
 BOOKMARKS_FILE = os.path.join(os.path.dirname(__file__), "bookmarks.json")
 
-# In-memory bookmarks structure
-_bookmarks = OrderedDict()
-
+# In-memory bookmarks structure, This code creates the Hash Table
+_bookmarks = OrderedDict() # Creates the hash-based dictionary : Allocates hash table
 
 def _make_key(book, reference):
     """Create a unique key for each verse."""
@@ -51,7 +50,7 @@ def _save_bookmarks():
 def add_bookmark(book, reference, verse_text):
     """Add a bookmark and save it permanently."""
     key = _make_key(book, reference)
-    _bookmarks[key] = (book, reference, verse_text)
+    _bookmarks[key] = (book, reference, verse_text) # Adds/updates a bookmark : Stores using hash of key
     _save_bookmarks()
     print(f"✅ Bookmarked: {book} {reference}")
 
@@ -62,7 +61,7 @@ def view_bookmarks():
         print("\nNo bookmarks yet.")
         return
     print("\n📚 Your Bookmarks:")
-    for i, (key, value) in enumerate(_bookmarks.items(), 1):
+    for i, (key, value) in enumerate(_bookmarks.items(), 1): # Iterates in order : Retrieves entries sequentially
         book, reference, text = value
         print(f"{i}. {book} {reference} - {text}")
 
@@ -71,8 +70,8 @@ def remove_bookmark(index=None, key=None):
     """Remove a bookmark by index or key."""
     try:
         if key is not None:
-            if key in _bookmarks:
-                removed = _bookmarks.pop(key)
+            if key in _bookmarks: # Checks for existence : Performs hash lookup
+                removed = _bookmarks.pop(key) # Removes a bookmark : Finds entry via hash
                 _save_bookmarks()
                 print(f"🗑️ Removed: {removed[0]} {removed[1]}")
                 return True
