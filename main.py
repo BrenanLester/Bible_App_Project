@@ -9,6 +9,7 @@ This version reads `kjv.json` and includes:
 """
 
 import os
+import time
 from bible_parser_json import JSONBibleParser
 from search import search_bible
 from bookmarks import add_bookmark, view_bookmarks, remove_bookmark

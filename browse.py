@@ -1,4 +1,3 @@
-import os
 from bookmarks import add_bookmark, view_bookmarks, remove_bookmark
 
 def browse_bible(bible, parser):
