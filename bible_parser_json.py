@@ -89,4 +89,8 @@ class BibleParserJSON:
         return self.load_all_books()
 
 # Alias for backward compatibility
+<<<<<<< HEAD
 JSONBibleParser = BibleParserJSON
+=======
+JSONBibleParser = BibleParserJSON
+>>>>>>> 738c17f541b87184a916976e82abde23c6fb46d2
