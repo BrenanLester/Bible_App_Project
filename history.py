@@ -3,7 +3,7 @@ import os
 from collections import deque
 
 class SearchHistory:
-    def __init__(self, history_path="search_history.json", limit=10):
+    def __init__(self, history_path="history.json", limit=10):
         self.history_path = history_path
         self.limit = limit
         self.history = deque(maxlen=limit)

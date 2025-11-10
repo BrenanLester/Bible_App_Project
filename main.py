@@ -104,11 +104,17 @@ def main():
         if choice == "1":
             show_section_header("SEARCH VERSE")
             from search import search_bible
-            from history import add_to_history
+            from history import SearchHistory
             query = input("Enter keyword or phrase: ").strip()
-            add_to_history(query)
+            history = SearchHistory()
+            history.add(query)
+
             results = search_bible(bible, query)
-            if results:
+            if results is None:  # User pressed 'q'
+                clear_screen()
+                show_header()
+                continue
+            elif results:
                 for i, (book, ref, text) in enumerate(results, 1):
                     print(f"{i}. {book} {ref} - {text}")
                 if input("\nBookmark a result? (y/n): ").strip().lower() == "y":
@@ -149,8 +155,17 @@ def main():
 
         elif choice == "4":
             show_section_header("SEARCH HISTORY")
-            from history import load_history
-            load_history()
+            from history import SearchHistory
+            history = SearchHistory()  # Create instance
+            history_items = history.list_all()  # Get all history items
+            
+            if history_items:
+                print("\nRecent searches:")
+                for i, query in enumerate(history_items, 1):
+                    print(f"{i}. {query}")
+            else:
+                print("\nNo search history found.")
+                
             input(f"\n{GREEN}Press Enter to return to main menu...{RESET}")
             clear_screen()
             show_header()

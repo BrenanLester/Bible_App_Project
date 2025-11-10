@@ -71,6 +71,7 @@ def show_paginated_results(found, words):
     PAGE_SIZE = 10
     total = len(found)
     index = 0
+    results = []
 
     while index < total:
         end = min(index + PAGE_SIZE, total)
@@ -81,15 +82,30 @@ def show_paginated_results(found, words):
             display_text = highlight_all(text, words)
             print(f"{CYAN}{display_book} {display_chap}:{display_verse}{RESET}")
             print(display_text + "\n")
+            results.append((book, f"{chap}:{verse}", text))
 
         index += PAGE_SIZE
         if index < total:
             remaining = total - index
-            cont = input(f"🔽 Press Enter to see next {min(PAGE_SIZE, remaining)} results (or type 'q' to stop): ")
-            if cont.lower() == 'q':
-                break
+            prompt = f"🔽 Press Enter to see next {min(PAGE_SIZE, remaining)} results (or type 'q' to stop): "
+            response = input(prompt).strip().lower()
+            if response == 'q':
+                print(f"\n✅ Showed {end} of {total} results.")
+                return None
         else:
             print(f"✅ End of results. Displayed all {total} matches.\n")
+
+    return results
+
+def search_bible(bible, query):  # Add this function for main.py to use
+    found = search(query)
+    if not found:
+        print("❌ No results found.\n")
+        return []
+    
+    words = query.split()
+    results = show_paginated_results(found, words)
+    return results
 
 # === Main Program ===
 print(f"{CYAN}📖 Bible Search — KJV Edition{RESET}")
