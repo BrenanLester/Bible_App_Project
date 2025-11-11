@@ -91,7 +91,7 @@ def show_paginated_results(found, words):
         else:
             print(f"✅ End of results. Displayed all {total} matches.\n")
 
-            # === Show results in pages with bookmarking option after each page ===
+ # === Show results in pages with bookmarking option after each page ===
 def show_paginated_results_with_bookmarking(found, words):
     PAGE_SIZE = 10
     total = len(found)
@@ -111,10 +111,17 @@ def show_paginated_results_with_bookmarking(found, words):
             print(display_text + "\n")
 
         # Offer bookmarking for current page
-        bookmark_choice = input(f"{GREEN}Bookmark from this page? (y/n/next/q to quit): {RESET}").strip().lower()
+        bookmark_choice = input(f"{GREEN}Bookmark from this page? (y/n/next/q to quit/s to search again): {RESET}").strip().lower()
         
         if bookmark_choice == 'q':
-            return True  # Return to search menu
+            # ADDED: Ask if user wants to search again instead of directly returning to main menu
+            search_again = input(f"{GREEN}Return to main menu? (y) or search again? (n): {RESET}").strip().lower()
+            if search_again == 'y':
+                return True  # Return to main menu
+            else:
+                return False  # Signal to search again
+        elif bookmark_choice == 's':
+            return False  # Signal to search again
         elif bookmark_choice == 'y':
             try:
                 start_num = index + 1
@@ -125,6 +132,14 @@ def show_paginated_results_with_bookmarking(found, words):
                     from bookmarks import add_bookmark
                     add_bookmark(book, f"{chap}:{verse}", text)
                     print("✅ Bookmark added!")
+                    
+                    # After bookmarking, ask if user wants to continue or search again
+                    continue_choice = input(f"{GREEN}Continue browsing results? (y/n/s to search again): {RESET}").strip().lower()
+                    if continue_choice == 's':
+                        return False  # Search again
+                    elif continue_choice == 'n':
+                        return True  # Return to search menu
+                    # If 'y', just continue to next page
                 else:
                     print(f"❌ Please enter a number between {start_num} and {end_num}.")
             except ValueError:
@@ -137,7 +152,6 @@ def show_paginated_results_with_bookmarking(found, words):
         index += PAGE_SIZE
         if index >= total:
             print(f"✅ End of results. Displayed all {total} matches.\n")
-            break
 
     return False  # Continue in search interface
 
@@ -191,8 +205,14 @@ def search_interface(bible):
         ).strip()
 
         if query.lower() == "q":
-            print(f"{CYAN}Returning to main menu...{RESET}")
-            return True  # Signal to return to main menu
+            # ADDED: Instead of directly returning, ask if they want to search again
+            search_again = input(f"\n{GREEN}Return to main menu? (y/n): {RESET}").strip().lower()
+            if search_again == 'y':
+                print(f"{CYAN}Returning to main menu...{RESET}")
+                return True  # Signal to return to main menu
+            else:
+                print(f"{CYAN}Continuing search...{RESET}\n")
+                continue  # Continue with new search
 
         if not query:
             continue
@@ -211,8 +231,9 @@ def search_interface(bible):
             words = query.split()
             # Show paginated results with bookmarking option after each page
             should_return = show_paginated_results_with_bookmarking(found, words)
+            
             if should_return:
-                return True  # Return to main menu if user pressed 'q'
+                return True  # Return to main menu
 
 # === Standalone execution (for testing) ===
 if __name__ == "__main__":
