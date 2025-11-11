@@ -8,6 +8,7 @@ This module:
 
 import json
 import os
+from ascii_art import BOOKMARK_ART
 from collections import OrderedDict
 
 # JSON file for saving bookmarks
@@ -15,6 +16,13 @@ BOOKMARKS_FILE = os.path.join(os.path.dirname(__file__), "bookmarks.json")
 
 # In-memory bookmarks structure, This code creates the Hash Table
 _bookmarks = OrderedDict() # Creates the hash-based dictionary : Allocates hash table
+
+# === Colors (ANSI) ===
+YELLOW = "\033[93m"
+GREEN  = "\033[92m"
+RESET  = "\033[0m"
+CYAN   = "\033[96m"
+RED    = "\033[91m"
 
 def _make_key(book, reference):
     """Create a unique key for each verse."""
@@ -52,18 +60,30 @@ def add_bookmark(book, reference, verse_text):
     key = _make_key(book, reference)
     _bookmarks[key] = (book, reference, verse_text) # Adds/updates a bookmark : Stores using hash of key
     _save_bookmarks()
-    print(f"✅ Bookmarked: {book} {reference}")
+    print(f"✅ {GREEN}Bookmarked: {book} {reference}{RESET}")
 
 
 def view_bookmarks():
     """Display all saved bookmarks."""
+    print(f"{YELLOW}{BOOKMARK_ART}{RESET}")
+    print(f"{CYAN}📚 Bible Bookmarks Manager{RESET}")
+    print(f"{CYAN}══════════════════════════════════════════════════{RESET}")
+    
     if not _bookmarks:
-        print("\nNo bookmarks yet.")
+        print(f"\n{YELLOW}No bookmarks yet.{RESET}")
+        print(f"{CYAN}══════════════════════════════════════════════════{RESET}")
         return
-    print("\n📚 Your Bookmarks:")
+        
+    print(f"\n{YELLOW}📖 Your Saved Bookmarks ({len(_bookmarks)} total):{RESET}")
+    print(f"{CYAN}──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────{RESET}")
+    
     for i, (key, value) in enumerate(_bookmarks.items(), 1): # Iterates in order : Retrieves entries sequentially
         book, reference, text = value
-        print(f"{i}. {book} {reference} - {text}")
+        # Truncate long text for cleaner display
+        display_text = text if len(text) < 60 else text[:57] + "..."
+        print(f"{i:2d}.{RESET} {CYAN}{book} {reference}{RESET}")
+        print(f"    {GREEN}└─ {display_text}{RESET}")
+        print(f"    {CYAN}──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────{RESET}" if i < len(_bookmarks) else "")
 
 
 def remove_bookmark(index=None, key=None):
@@ -73,23 +93,23 @@ def remove_bookmark(index=None, key=None):
             if key in _bookmarks: # Checks for existence : Performs hash lookup
                 removed = _bookmarks.pop(key) # Removes a bookmark : Finds entry via hash
                 _save_bookmarks()
-                print(f"🗑️ Removed: {removed[0]} {removed[1]}")
+                print(f"🗑️ {RED}Removed: {removed[0]} {removed[1]}{RESET}")
                 return True
-            print("Bookmark key not found.")
+            print(f"{RED}Bookmark key not found.{RESET}")
             return False
 
         if index is None:
-            print("Provide index or key to remove.")
+            print(f"{RED}Provide index or key to remove.{RESET}")
             return False
 
         keys = list(_bookmarks.keys())
         real_key = keys[index - 1]
         removed = _bookmarks.pop(real_key)
         _save_bookmarks()
-        print(f"🗑️ Removed: {removed[0]} {removed[1]}")
+        print(f"🗑️ {RED}Removed: {removed[0]} {removed[1]}{RESET}")
         return True
     except IndexError:
-        print("Invalid bookmark number.")
+        print(f"{RED}❌ Invalid bookmark number.{RESET}")
         return False
 
 
