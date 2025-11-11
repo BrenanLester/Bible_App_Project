@@ -63,7 +63,7 @@ def browse_bible(bible, parser):
     
     # Step 1: Choose Book - GRID VIEW (3 columns)
     print(f"\n{YELLOW}Available Books:{RESET}")
-    print(f"{CYAN}╔══════════════════════════════════════════════════════════════════════════════╗{RESET}")
+    print(f"{CYAN}╔════════════════════════════════════════════════════════════════╗{RESET}")
     
     # Calculate how many rows needed for 3-column layout
     total_books = len(available_books)
@@ -85,7 +85,7 @@ def browse_bible(bible, parser):
         line += f" {CYAN}║{RESET}"
         print(line)
     
-    print(f"{CYAN}╚══════════════════════════════════════════════════════════════════════════════╝{RESET}")
+    print(f"{CYAN}╚════════════════════════════════════════════════════════════════╝{RESET}")
     
     book_choice = input(f"\n{YELLOW}Choose a book number (1-{len(available_books)}) or 'back': {RESET}").strip()
     
@@ -108,7 +108,7 @@ def browse_bible(bible, parser):
 
     # Step 2: Choose Chapter - SINGLE ROW (original format)
     print(f"\n{CYAN}╔══════════════════════════════════════╗{RESET}")
-    print(f"{CYAN}║          Chapters in {book_name:<12}   ║{RESET}")
+    print(f"{CYAN}║          Chapters in {book_name:<12}    ║{RESET}")
     print(f"{CYAN}╚══════════════════════════════════════╝{RESET}")
     
     print(f"\n{YELLOW}Available Chapters:{RESET}")
@@ -134,16 +134,18 @@ def browse_bible(bible, parser):
     verses = bible[book_name][chapter]
 
     # Step 3: Choose Verse - GRID VIEW (3 columns)
-    print(f"\n{CYAN}╔══════════════════════════════════════╗{RESET}")
-    print(f"{CYAN}║          Verses in {book_name} {chapter:<3}       ║{RESET}")
-    print(f"{CYAN}╚══════════════════════════════════════╝{RESET}")
-    
+    title = f"Verses in {book_name} {chapter}"
+    border_length = len(title) + 16 # +4 for padding
+
+    print(f"\n{CYAN}╔{'═' * border_length}╗{RESET}")
+    print(f"{CYAN}║        {title}        ║{RESET}")
+    print(f"{CYAN}╚{'═' * border_length}╝{RESET}")
     print(f"\n{YELLOW}Available Verses:{RESET}")
     verse_nums = list(verses.keys())
-    print(f"{CYAN}╔══════════════════════════════════════════════════════════════════════════════╗{RESET}")
+    print(f"{CYAN}╔═══════════════════════════════════════════════════════════╗{RESET}")
     
     total_verses = len(verse_nums)
-    columns = 3
+    columns = 4
     rows_needed = (total_verses + columns - 1) // columns
     
     for row in range(rows_needed):
@@ -156,12 +158,12 @@ def browse_bible(bible, parser):
                 verse_num = verse_nums[verse_index]
                 line += f" {GREEN}{verse_num:>4}{RESET}"
             else:
-                line += " " * 6  # Space for empty column
+                line += " " * 5# Space for empty column
                 
-        line += " " * 40 + f" {CYAN}║{RESET}"
+        line += " " * 38+ f" {CYAN}║{RESET}"
         print(line)
     
-    print(f"{CYAN}╚══════════════════════════════════════════════════════════════════════════════╝{RESET}")
+    print(f"{CYAN}╚═══════════════════════════════════════════════════════════╝{RESET}")
     
     verse_choice = input(f"\n{YELLOW}Enter verse number or 'back': {RESET}").strip()
     
