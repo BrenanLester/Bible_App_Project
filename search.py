@@ -4,13 +4,12 @@ from prompt_toolkit import prompt
 from prompt_toolkit.styles import Style
 from bible_parser_json import JSONBibleParser
 
-if __name__ == "__main__":
 # === Load and Parse Bible JSON ===
-    print("Loading Bible...")
-    json_path = os.path.join(os.path.dirname(__file__), "kjv.json")
-    parser = JSONBibleParser(json_path)
-    bible = parser.load()
-    print(f"✅ Bible loaded! {len(bible)} books ready.\n")
+print("Loading Bible...")
+json_path = os.path.join(os.path.dirname(__file__), "kjv.json")
+parser = JSONBibleParser(json_path)
+bible = parser.load()
+print(f"✅ Bible loaded! {len(bible)} books ready.\n")
 
 # === Colors (ANSI) ===
 YELLOW = "\033[93m"
@@ -72,6 +71,7 @@ def show_paginated_results(found, words):
     PAGE_SIZE = 10
     total = len(found)
     index = 0
+    results = []
 
     while index < total:
         end = min(index + PAGE_SIZE, total)
@@ -82,30 +82,45 @@ def show_paginated_results(found, words):
             display_text = highlight_all(text, words)
             print(f"{CYAN}{display_book} {display_chap}:{display_verse}{RESET}")
             print(display_text + "\n")
+            results.append((book, f"{chap}:{verse}", text))
 
         index += PAGE_SIZE
         if index < total:
             remaining = total - index
-            cont = input(f"🔽 Press Enter to see next {min(PAGE_SIZE, remaining)} results (or type 'q' to stop): ")
-            if cont.lower() == 'q':
-                break
+            prompt = f"🔽 Press Enter to see next {min(PAGE_SIZE, remaining)} results (or type 'q' to stop): "
+            response = input(prompt).strip().lower()
+            if response == 'q':
+                print(f"\n✅ Showed {end} of {total} results.")
+                return None
         else:
             print(f"✅ End of results. Displayed all {total} matches.\n")
 
+    return results
+
+def search_bible(bible, query):  # Add this function for main.py to use
+    found = search(query)
+    if not found:
+        print("❌ No results found.\n")
+        return []
+    
+    words = query.split()
+    results = show_paginated_results(found, words)
+    return results
+
 # === Main Program ===
 print(f"{CYAN}📖 Bible Search — KJV Edition{RESET}")
-print(f"""{CYAN}
- ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄         ▄       ▄▄▄▄▄▄▄▄▄▄▄  ▄         ▄  ▄▄        ▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄        ▄ 
-▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░▌       ▐░▌     ▐░░░░░░░░░░░▌▐░▌       ▐░▌▐░░▌      ▐░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░▌      ▐░▌
-▐░█▀▀▀▀▀▀▀▀▀ ▐░█▀▀▀▀▀▀▀▀▀ ▐░█▀▀▀▀▀▀▀█░▌▐░█▀▀▀▀▀▀▀█░▌▐░█▀▀▀▀▀▀▀▀▀ ▐░▌       ▐░▌     ▐░█▀▀▀▀▀▀▀▀▀ ▐░▌       ▐░▌▐░▌░▌     ▐░▌▐░█▀▀▀▀▀▀▀▀▀  ▀▀▀▀█░█▀▀▀▀  ▀▀▀▀█░█▀▀▀▀ ▐░█▀▀▀▀▀▀▀█░▌▐░▌░▌     ▐░▌
-▐░▌          ▐░▌          ▐░▌       ▐░▌▐░▌       ▐░▌▐░▌          ▐░▌       ▐░▌     ▐░▌          ▐░▌       ▐░▌▐░▌▐░▌    ▐░▌▐░▌               ▐░▌          ▐░▌     ▐░▌       ▐░▌▐░▌▐░▌    ▐░▌
-▐░█▄▄▄▄▄▄▄▄▄ ▐░█▄▄▄▄▄▄▄▄▄ ▐░█▄▄▄▄▄▄▄█░▌▐░█▄▄▄▄▄▄▄█░▌▐░▌          ▐░█▄▄▄▄▄▄▄█░▌     ▐░█▄▄▄▄▄▄▄▄▄ ▐░▌       ▐░▌▐░▌ ▐░▌   ▐░▌▐░▌               ▐░▌          ▐░▌     ▐░▌       ▐░▌▐░▌ ▐░▌   ▐░▌
-▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░▌          ▐░░░░░░░░░░░▌     ▐░░░░░░░░░░░▌▐░▌       ▐░▌▐░▌  ▐░▌  ▐░▌▐░▌               ▐░▌          ▐░▌     ▐░▌       ▐░▌▐░▌  ▐░▌  ▐░▌
- ▀▀▀▀▀▀▀▀▀█░▌▐░█▀▀▀▀▀▀▀▀▀ ▐░█▀▀▀▀▀▀▀█░▌▐░█▀▀▀▀█░█▀▀ ▐░▌          ▐░█▀▀▀▀▀▀▀█░▌     ▐░█▀▀▀▀▀▀▀▀▀ ▐░▌       ▐░▌▐░▌   ▐░▌ ▐░▌▐░▌               ▐░▌          ▐░▌     ▐░▌       ▐░▌▐░▌   ▐░▌ ▐░▌
-          ▐░▌▐░▌          ▐░▌       ▐░▌▐░▌     ▐░▌  ▐░▌          ▐░▌       ▐░▌     ▐░▌          ▐░▌       ▐░▌▐░▌    ▐░▌▐░▌▐░▌               ▐░▌          ▐░▌     ▐░▌       ▐░▌▐░▌    ▐░▌▐░▌
- ▄▄▄▄▄▄▄▄▄█░▌▐░█▄▄▄▄▄▄▄▄▄ ▐░▌       ▐░▌▐░▌      ▐░▌ ▐░█▄▄▄▄▄▄▄▄▄ ▐░▌       ▐░▌     ▐░▌          ▐░█▄▄▄▄▄▄▄█░▌▐░▌     ▐░▐░▌▐░█▄▄▄▄▄▄▄▄▄      ▐░▌      ▄▄▄▄█░█▄▄▄▄ ▐░█▄▄▄▄▄▄▄█░▌▐░▌     ▐░▐░▌
-▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░▌       ▐░▌▐░▌       ▐░▌▐░░░░░░░░░░░▌▐░▌       ▐░▌     ▐░▌          ▐░░░░░░░░░░░▌▐░▌      ▐░░▌▐░░░░░░░░░░░▌     ▐░▌     ▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░▌      ▐░░▌
- ▀▀▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀         ▀  ▀         ▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀         ▀       ▀            ▀▀▀▀▀▀▀▀▀▀▀  ▀        ▀▀  ▀▀▀▀▀▀▀▀▀▀▀       ▀       ▀▀▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀        ▀▀ 
+print(f"""{CYAN}▐▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▌
+▐                                                                                                                                                                       ▌
+▐     .d8888b.  8888888888        d8888 8888888b.   .d8888b.  888    888     8888888888 888     888 888b    888  .d8888b. 88888888888 8888888 .d88888b.  888b    888    ▌
+▐    d88P  Y88b 888              d88888 888   Y88b d88P  Y88b 888    888     888        888     888 8888b   888 d88P  Y88b    888       888  d88P" "Y88b 8888b   888    ▌
+▐    Y88b.      888             d88P888 888    888 888    888 888    888     888        888     888 88888b  888 888    888    888       888  888     888 88888b  888    ▌
+▐     "Y888b.   8888888        d88P 888 888   d88P 888        8888888888     8888888    888     888 888Y88b 888 888           888       888  888     888 888Y88b 888    ▌
+▐        "Y88b. 888           d88P  888 8888888P"  888        888    888     888        888     888 888 Y88b888 888           888       888  888     888 888 Y88b888    ▌
+▐          "888 888          d88P   888 888 T88b   888    888 888    888     888        888     888 888  Y88888 888    888    888       888  888     888 888  Y88888    ▌
+▐    Y88b  d88P 888         d8888888888 888  T88b  Y88b  d88P 888    888     888        Y88b. .d88P 888   Y8888 Y88b  d88P    888       888  Y88b. .d88P 888   Y8888    ▌
+▐     "Y8888P"  8888888888 d88P     888 888   T88b  "Y8888P"  888    888     888         "Y88888P"  888    Y888  "Y8888P"     888     8888888 "Y88888P"  888    Y888    ▌
+▐                                                                                                                                                                       ▌
+▐▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▌
 {RESET}""")
 
 print("Search by keyword(s), book name, or exact reference (e.g., Genesis 2:2).")
@@ -136,4 +151,3 @@ while True:
     else:
         words = query.split()
         show_paginated_results(found, words)
-
