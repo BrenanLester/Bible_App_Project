@@ -153,19 +153,28 @@ def main():
             clear_screen()
             show_header()
 
-        elif choice == "4":
+            elif choice == "4":
             show_section_header("SEARCH HISTORY")
             from history import SearchHistory
-            history = SearchHistory()  # Create instance
-            history_items = history.list_all()  # Get all history items
-            
+            history = SearchHistory()
+            history_items = history.list_all()
+
             if history_items:
                 print("\nRecent searches:")
                 for i, query in enumerate(history_items, 1):
                     print(f"{i}. {query}")
+
+                # === Ask to clear history AFTER listing ===
+                clear_choice = input("\nDo you want to CLEAR ALL history? (y/n): ").strip().lower()
+
+                if clear_choice == "y":
+                    history.clear()
+                    print("\n✅ All search history has been cleared!")
+                else:
+                    print("\n❎ History not cleared.")
             else:
                 print("\nNo search history found.")
-                
+
             input(f"\n{GREEN}Press Enter to return to main menu...{RESET}")
             clear_screen()
             show_header()
