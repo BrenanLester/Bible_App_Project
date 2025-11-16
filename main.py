@@ -9,7 +9,7 @@ from verse_of_the_day import verse_of_the_day
 from ascii_art import HEADER_ART, MAIN_MENU_ART
 
 # === CORE FUNCTIONS ===
-def typewriter(text, delay=1.5):
+def typewriter(text, delay=1):
     for char in text:
         sys.stdout.write(char)
         sys.stdout.flush()
@@ -151,7 +151,7 @@ def main():
         
         return lines
 
-    wrapped_lines = wrap_text(verse_text, border_width - 4)
+    wrapped_lines = wrap_text(verse_text, border_width - 2)
 
     # Center the entire border
     terminal_width = 196
@@ -160,11 +160,13 @@ def main():
     # Print the border and verse - KEEPING THIS EXACTLY AS YOU HAVE IT
     print(f"{' ' * border_padding}{GREEN}┌{'📖  VERSE OF THE DAY  📖' }┐{RESET}")
     print(f"{' ' * border_padding}{CYAN}┌{'─' * border_width}┐{RESET}")
-    print(f"{' ' * border_padding}{CYAN}│{' ' * border_width}│{RESET}")
+ 
     print(f"{' ' * border_padding}{CYAN}│{' ' * border_width}│{RESET}")
 
     for line in wrapped_lines:
-        print(f"{' ' * border_padding}{CYAN}│{RESET} {WHITE}{line:^{border_width-2}}{RESET} {CYAN}│{RESET}")
+     print(f"{' ' * border_padding}{CYAN}│{RESET} ", end="")
+     typewriter(f"{WHITE}{line:^{border_width-2}}{RESET}", delay=0.02)
+     print(f" {CYAN}│{RESET}")
 
     print(f"{' ' * border_padding}{CYAN}│{' ' * border_width}│{RESET}")
     print(f"{' ' * border_padding}{CYAN}└{'─' * border_width}┘{RESET}")
