@@ -3,10 +3,9 @@ import os
 from collections import deque
 
 class SearchHistory:
-    def __init__(self, history_path="history.json", limit=500):
+    def __init__(self, history_path="history.json"):
         self.history_path = history_path
-        self.limit = limit
-        self.history = deque(maxlen=limit)
+        self.history = deque()   # No maxlen, unlimited size
         self.load_history()
 
     # === Load existing history from file ===
@@ -15,18 +14,18 @@ class SearchHistory:
             try:
                 with open(self.history_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                    self.history = deque(data, maxlen=self.limit)
+                    self.history = deque(data)  # No limit
             except json.JSONDecodeError:
-                self.history = deque(maxlen=self.limit)
+                self.history = deque()
         else:
-            self.history = deque(maxlen=self.limit)
+            self.history = deque()
 
     # === Save current history to file ===
     def save_history(self):
         with open(self.history_path, "w", encoding="utf-8") as f:
             json.dump(list(self.history), f, indent=2)
 
-    # === Create/Add new search query ===
+    # === Add new search query ===
     def add(self, query):
         if query.strip() and query not in self.history:
             self.history.appendleft(query)
@@ -36,7 +35,7 @@ class SearchHistory:
     def list_all(self):
         return list(self.history)
 
-    # === Update specific history entry ===
+    # === Update an entry ===
     def update(self, old_query, new_query):
         try:
             idx = self.history.index(old_query)
@@ -46,7 +45,7 @@ class SearchHistory:
         except ValueError:
             return False
 
-    # === Delete specific entry ===
+    # === Delete an entry ===
     def delete(self, query):
         try:
             self.history.remove(query)
