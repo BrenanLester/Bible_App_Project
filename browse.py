@@ -31,13 +31,18 @@ def browse_bible(bible, parser):
         '3 John', 'Jude', 'Revelation'
     ]
     
-    # Choose Testament
+    # Show all books count automatically
+    print(f"\n{YELLOW}Bible Statistics:{RESET}")
+    print(f"{GREEN}• Old Testament: {len(old_testament)} books{RESET}")
+    print(f"{GREEN}• New Testament: {len(new_testament)} books{RESET}")
+    print(f"{CYAN}• All Books: {len(bible)} books total{RESET}")
+    
+    # Choose Testament - Only Old/New Testament choices
     print(f"\n{YELLOW}Choose Testament:{RESET}")
     print(f"{GREEN}[1]{RESET} Old Testament ({len(old_testament)} books)")
     print(f"{GREEN}[2]{RESET} New Testament ({len(new_testament)} books)")
-    print(f"{GREEN}[3]{RESET} All Books ({len(bible)} books)")
     
-    testament_choice = input(f"\n{YELLOW}Enter choice (1-3) or 'back': {RESET}").strip()
+    testament_choice = input(f"\n{YELLOW}Enter choice (1-2) or 'back': {RESET}").strip()
     
     if testament_choice.lower() == 'back':
         return
@@ -50,11 +55,8 @@ def browse_bible(bible, parser):
     elif testament_choice == "2":
         available_books = [book for book in bible.keys() if book in new_testament]
         testament_name = "New Testament"
-    elif testament_choice == "3":
-        available_books = list(bible.keys())
-        testament_name = "All Books"
     else:
-        print("❌ Invalid choice.")
+        print("❌ Invalid choice. Please enter 1 or 2.")
         return
     
     print(f"\n{CYAN}╔══════════════════════════════════════╗{RESET}")
@@ -62,7 +64,7 @@ def browse_bible(bible, parser):
     print(f"{CYAN}╚══════════════════════════════════════╝{RESET}")
     
     # Step 1: Choose Book - GRID VIEW (3 columns)
-    print(f"\n{YELLOW}Available Books:{RESET}")
+    print(f"\n{YELLOW}Books:{RESET}")
     print(f"{CYAN}╔════════════════════════════════════════════════════════════════╗{RESET}")
     
     # Calculate how many rows needed for 3-column layout
@@ -111,7 +113,7 @@ def browse_bible(bible, parser):
     print(f"{CYAN}║          Chapters in {book_name:<12}    ║{RESET}")
     print(f"{CYAN}╚══════════════════════════════════════╝{RESET}")
     
-    print(f"\n{YELLOW}Available Chapters:{RESET}")
+    print(f"\n{YELLOW}Chapters:{RESET}")
     for i, ch in enumerate(chapters, 1):
         if i % 10 == 0 or i == len(chapters):
             print(f"{GREEN}{ch}{RESET}")
