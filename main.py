@@ -9,7 +9,7 @@ from verse_of_the_day import verse_of_the_day
 from ascii_art import HEADER_ART, MAIN_MENU_ART
 
 # === CORE FUNCTIONS ===
-def typewriter(text, delay=0.02):
+def typewriter(text, delay=1.5):
     for char in text:
         sys.stdout.write(char)
         sys.stdout.flush()
@@ -254,20 +254,60 @@ def main():
             RED    = "\033[91m"
             show_section_header("BOOKMARKS")
             view_bookmarks()
-            if input(f"{RED}\nRemove a bookmark? (y/n):{RESET}").strip().lower() == "y":
-                try:
-                    num = int(input("Enter bookmark number: "))
-                    remove_bookmark(num)
-                    print("✅ Bookmark removed!")
-                except ValueError:
-                    print("Invalid input.")
+            try:
+                print(f"\n{CYAN}Options:{RESET}")
+                print(f"{GREEN}[1]{RESET} Remove a specific bookmark")
+                print(f"{GREEN}[2]{RESET} Clear ALL bookmarks")
+                print(f"{GREEN}[3]{RESET} Return to main menu")
+                
+                sub_choice = input(f"\n{YELLOW}Choose option (1-3): {RESET}").strip()
+                
+                if sub_choice == "1":
+                    try:
+                        num = int(input(f"{YELLOW}Enter bookmark number: {RESET}"))
+                        remove_bookmark(num)
+                    except ValueError:
+                        print(f"{RED}❌ Invalid input. Please enter a number.{RESET}")
+                    except Exception as e:
+                        print(f"{RED}❌ Error removing bookmark: {e}{RESET}")
+                
+                elif sub_choice == "2":
+                    # Clear all bookmarks with confirmation
+                    from bookmarks import clear_all_bookmarks
+                    clear_all_bookmarks()
+                
+                elif sub_choice == "3":
+                    pass  # Return to main menu
+                else:
+                    print(f"{RED}❌ Invalid option.{RESET}")
+            
+            except Exception as e:
+                print(f"{RED}❌ Error in bookmarks menu: {e}{RESET}")
             input(f"\n{GREEN}Press Enter to return to main menu...{RESET}")
             clear_screen()
 
         elif choice == "4":
             show_section_header("SEARCH HISTORY")
-            from history import view_history
-            view_history()
+            from history import SearchHistory
+            history = SearchHistory()
+            history_items = history.list_all()
+
+            if history_items:
+                print("\nRecent searches:")
+                for i, query in enumerate(history_items, 1):
+                    print(f"{i}. {query}")
+
+                # === Ask to clear history AFTER listing ===
+                clear_choice = input("\nDo you want to CLEAR ALL history? (y/n): ").strip().lower()
+
+                if clear_choice == "y":
+                    history.clear()
+                    print("\n✅ All search history has been cleared!")
+                else:
+                    print("\n❎ History not cleared.")
+            else:
+                print("\nNo search history found.")
+
             input(f"\n{GREEN}Press Enter to return to main menu...{RESET}")
             clear_screen()
 

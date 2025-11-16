@@ -3,10 +3,9 @@ import os
 from collections import deque
 
 class SearchHistory:
-    def __init__(self, history_path="search_history.json", limit=10):
+    def __init__(self, history_path="history.json"):
         self.history_path = history_path
-        self.limit = limit
-        self.history = deque(maxlen=limit)
+        self.history = deque()   # No maxlen, unlimited size
         self.load_history()
 
     # === Load existing history from file ===
@@ -15,28 +14,45 @@ class SearchHistory:
             try:
                 with open(self.history_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                    self.history = deque(data, maxlen=self.limit)
+                    self.history = deque(data)  # No limit
             except json.JSONDecodeError:
-                self.history = deque(maxlen=self.limit)
+                self.history = deque()
         else:
-            self.history = deque(maxlen=self.limit)
+            self.history = deque()
 
     # === Save current history to file ===
     def save_history(self):
-        with open(self.history_path, "w", encoding="utf-8") as f:
-            json.dump(list(self.history), f, indent=2)
+        try:
+            with open(self.history_path, "w", encoding="utf-8") as f:
+                json.dump(list(self.history), f, indent=2)
+        except Exception as e:
+            print(f"⚠️  Error saving history: {e}")
 
-    # === Create/Add new search query ===
+    # === Add new search query ===
     def add(self, query):
-        if query.strip() and query not in self.history:
-            self.history.appendleft(query)
-            self.save_history()
+        """Add query to history with error handling."""
+        try:
+            if not query or not query.strip():
+                return False
+            
+            if query not in self.history:
+                self.history.appendleft(query)
+                self.save_history()
+                return True
+            return False
+        except Exception as e:
+            print(f"⚠️  Error adding to history: {e}")
+            return False
 
-    # === Read all history ===
     def list_all(self):
-        return list(self.history)
+        """Return all history items safely."""
+        try:
+            return list(self.history)
+        except Exception as e:
+            print(f"⚠️  Error retrieving history: {e}")
+            return []
 
-    # === Update specific history entry ===
+    # === Update an entry ===
     def update(self, old_query, new_query):
         try:
             idx = self.history.index(old_query)
@@ -45,8 +61,11 @@ class SearchHistory:
             return True
         except ValueError:
             return False
+        except Exception as e:
+            print(f"⚠️  Error updating history: {e}")
+            return False
 
-    # === Delete specific entry ===
+    # === Delete an entry ===
     def delete(self, query):
         try:
             self.history.remove(query)
@@ -54,38 +73,17 @@ class SearchHistory:
             return True
         except ValueError:
             return False
+        except Exception as e:
+            print(f"⚠️  Error deleting from history: {e}")
+            return False
 
     # === Clear all history ===
     def clear(self):
-        self.history.clear()
-        self.save_history()
-
-
-        # === Function wrappers for easy use ===
-def add_to_history(query):
-    """Add a search query to history"""
-    history = SearchHistory()
-    history.add(query)
-
-def view_history():
-    """Display all search history"""
-    history = SearchHistory()
-    searches = history.list_all()
-    
-    GREEN = "\033[92m"
-    CYAN = "\033[96m"
-    RESET = "\033[0m"
-    
-    print(f"\n{CYAN}📋 Search History{RESET}")
-    print(f"{CYAN}╔══════════════════════════════════╗{RESET}")
-    
-    if not searches:
-        print(f"{CYAN}║     No search history found      ║{RESET}")
-    else:
-        for i, search in enumerate(searches, 1):
-            print(f"{CYAN}║{RESET} {i:2d}. {search:<28} {CYAN}║{RESET}")
-    
-    print(f"{CYAN}╚══════════════════════════════════╝{RESET}")
-    
-    if searches:
-        print(f"\n{GREEN}Total searches: {len(searches)}{RESET}")
+        """Clear history with error handling."""
+        try:
+            self.history.clear()
+            self.save_history()
+            return True
+        except Exception as e:
+            print(f"⚠️  Error clearing history: {e}")
+            return False

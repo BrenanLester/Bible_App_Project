@@ -6,6 +6,8 @@ from bible_parser_json import JSONBibleParser
 from ascii_art import SEARCH_ART
 from history import SearchHistory
 
+PAGE_SIZE = 10
+
 # Create a function to add to history
 def add_to_search_history(query):
     history = SearchHistory()
@@ -14,6 +16,7 @@ def add_to_search_history(query):
 # === Colors (ANSI) ===
 YELLOW = "\033[93m"
 GREEN  = "\033[92m"
+RED    = "\033[91m"
 RESET  = "\033[0m"
 CYAN   = "\033[96m"
 
@@ -37,63 +40,126 @@ def is_valid_reference(query):
 
 # === Search function ===
 def search_bible(bible, query):
-    results = []
-    words = query.lower().strip().split()
-
-    # Case 1: Exact verse search (e.g., Genesis 2:2)
-    if len(words) >= 2 and ":" in words[1]:
-        book_query = words[0]
-        chap_verse = words[1].split(":")
-        if len(chap_verse) == 2 and chap_verse[0].isdigit() and chap_verse[1].isdigit():
-            chapter_query, verse_query = chap_verse
-            for book, chapters in bible.items():
-                if book.lower().startswith(book_query) and chapter_query in chapters:
-                    if verse_query in chapters[chapter_query]:
-                        text = chapters[chapter_query][verse_query]
-                        results.append((book, chapter_query, verse_query, text, True))
-                        return results
-        else:
-            print("❌ Invalid format! Use: Genesis 2:2 (book chapter:verse).")
+    """
+    Search the Bible for verses matching the query with error handling.
+    
+    Args:
+        bible (dict): Bible data
+        query (str): Search query
+    
+    Returns:
+        list: Search results or empty list on error
+    """
+    try:
+        if not query or not query.strip():
+            print(f"{RED}❌ Search query cannot be empty.{RESET}")
             return []
+        
+        results = []
+        words = query.lower().strip().split()
 
-    # Case 2: Normal keyword or book search (exact words only)
-    for book, chapters in bible.items():
-        book_match = any(re.search(fr"\b{re.escape(w)}\b", book.lower()) for w in words)
-        for chapter, verses in chapters.items():
-            for verse, text in verses.items():
-                text_match = any(re.search(fr"\b{re.escape(w)}\b", text.lower()) for w in words)
-                if book_match or text_match:
-                    results.append((book, chapter, verse, text, book_match))
-    return results
+        # Case 1: Exact verse search
+        if len(words) >= 2 and ":" in words[1]:
+            try:
+                book_query = words[0]
+                chap_verse = words[1].split(":")
+                if len(chap_verse) == 2 and chap_verse[0].isdigit() and chap_verse[1].isdigit():
+                    chapter_query, verse_query = chap_verse
+                    for book, chapters in bible.items():
+                        if book.lower().startswith(book_query) and chapter_query in chapters:
+                            if verse_query in chapters[chapter_query]:
+                                text = chapters[chapter_query][verse_query]
+                                results.append((book, chapter_query, verse_query, text, True))
+                                return results
+                else:
+                    print(f"{RED}❌ Invalid format! Use: Genesis 2:2 (book chapter:verse).{RESET}")
+                    return []
+            except Exception as e:
+                print(f"{RED}❌ Error in exact verse search: {e}{RESET}")
+                return []
+
+        # Case 2: Normal keyword search
+        try:
+            for book, chapters in bible.items():
+                book_match = any(re.search(fr"\b{re.escape(w)}\b", book.lower()) for w in words)
+                for chapter, verses in chapters.items():
+                    for verse, text in verses.items():
+                        text_match = any(re.search(fr"\b{re.escape(w)}\b", text.lower()) for w in words)
+                        if book_match or text_match:
+                            results.append((book, chapter, verse, text, book_match))
+            return results
+        except Exception as e:
+            print(f"{RED}❌ Error during search: {e}{RESET}")
+            return []
+    
+    except Exception as e:
+        print(f"{RED}❌ Unexpected error in search: {e}{RESET}")
+        return []
 
 # === Show results in pages (10 at a time) ===
 def show_paginated_results(found, words):
-    PAGE_SIZE = 10
-    total = len(found)
-    index = 0
+    """
+    Display search results with pagination showing page numbers.
+    
+    Args:
+        found (List): List of verses found
+        words (List[str]): Search words to highlight
+    
+    Returns:
+        Optional[List]: Results if user viewed all, None if user quit with 'q'
+    """
+    try:
+        total = len(found)
+        index = 0
+        results = []
+        current_page = 1
 
-    while index < total:
-        end = min(index + PAGE_SIZE, total)
-        for book, chap, verse, text, book_match in found[index:end]:
-            display_book = highlight_all(book, words) if book_match else book
-            display_chap = highlight_all(str(chap), words)
-            display_verse = highlight_all(str(verse), words)
-            display_text = highlight_all(text, words)
-            print(f"{CYAN}{display_book} {display_chap}:{display_verse}{RESET}")
-            print(display_text + "\n")
+        while index < total:
+            end = min(index + PAGE_SIZE, total)
+            total_pages = (total + PAGE_SIZE - 1) // PAGE_SIZE
+            
+            # Display page header
+            print(f"\n{CYAN}📄 Page {current_page} of {total_pages} ({end} of {total} results){RESET}")
+            print(f"{CYAN}{'='*50}{RESET}\n")
+            
+            for book, chap, verse, text, book_match in found[index:end]:
+                try:
+                    display_book = highlight_all(book, words) if book_match else book
+                    display_chap = highlight_all(str(chap), words)
+                    display_verse = highlight_all(str(verse), words)
+                    display_text = highlight_all(text, words)
+                    
+                    print(f"{CYAN}{display_book} {display_chap}:{display_verse}{RESET}")
+                    print(display_text + "\n")
+                    results.append((book, f"{chap}:{verse}", text))
+                except Exception as e:
+                    print(f"{RED}⚠️  Error displaying verse: {e}{RESET}")
+                    continue
 
-        index += PAGE_SIZE
-        if index < total:
-            remaining = total - index
-            cont = input(f"🔽 Press Enter to see next {min(PAGE_SIZE, remaining)} results (or type 'q' to stop): ")
-            if cont.lower() == 'q':
-                break
-        else:
-            print(f"✅ End of results. Displayed all {total} matches.\n")
+            index += PAGE_SIZE
+            current_page += 1
+            
+            if index < total:
+                remaining = total - index
+                try:
+                    prompt_text = f"\n🔽 Press Enter to see Page {current_page} (or type 'q' to stop): "
+                    response = input(prompt_text).strip().lower()
+                    if response == 'q':
+                        print(f"\n✅ Showed {end} of {total} results.")
+                        return None
+                except KeyboardInterrupt:
+                    print(f"\n{YELLOW}⚠️  Search interrupted by user.{RESET}")
+                    return None
+            else:
+                print(f"{GREEN}✅ End of results. Displayed all {total} matches.{RESET}\n")
+
+        return results
+    except Exception as e:
+        print(f"{RED}❌ Error displaying results: {e}{RESET}")
+        return None
 
  # === Show results in pages with bookmarking option after each page ===
 def show_paginated_results_with_bookmarking(found, words):
-    PAGE_SIZE = 10
     total = len(found)
     index = 0
 
