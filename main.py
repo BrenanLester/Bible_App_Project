@@ -153,7 +153,7 @@ def main():
             clear_screen()
             show_header()
 
-            elif choice == "4":
+        elif choice == "4":
             show_section_header("SEARCH HISTORY")
             from history import SearchHistory
             history = SearchHistory()
