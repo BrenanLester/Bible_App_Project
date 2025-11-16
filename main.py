@@ -34,7 +34,8 @@ def show_landing_page():
     CYAN = "\033[96m"
     WHITE = "\033[97m"
     RESET = "\033[0m"
-    
+    BEIGE = "\033[38;5;223m"     # Warm beige
+
     lines = HEADER_ART.split('\n')
     
     # Find the width of the ASCII art
@@ -51,23 +52,23 @@ def show_landing_page():
         elif '│' in line:
             parts = line.split('│')
             if len(parts) >= 3:
-                print(CYAN + " " * border_padding + parts[0] + '│' + RESET + WHITE + parts[1] + RESET + CYAN + '│' + RESET)
+                print(CYAN + " " * border_padding + parts[0] + '│' + RESET + BEIGE + parts[1] + RESET + CYAN + '│' + RESET)
             else:
-                print(WHITE + padded_line + RESET)
+                print(BEIGE + padded_line + RESET)
         else:
-            print(WHITE + padded_line + RESET)
+            print(BEIGE + padded_line + RESET)
 
 def show_main_menu_header():
     """Show main menu header (different from landing page)"""
     CYAN = "\033[96m"
-    WHITE = "\033[97m"
+    CREAM = "\033[38;5;230m"
     RESET = "\033[0m"
     
     lines = MAIN_MENU_ART.split('\n')
     
     # Find the width of the ASCII art
     art_width = max(len(line) for line in lines)
-    terminal_width = 220  # Adjust this as needed
+    terminal_width = 220
     border_padding = (terminal_width - art_width) // 2
     
     for line in lines:
@@ -75,15 +76,12 @@ def show_main_menu_header():
         
         if line.strip() == '':
             print()
-        elif '┌' in line or '└' in line or '┐' in line or '┘' in line or '─' in line:
-            # Border lines - make it cyan
-            print(CYAN + padded_line + RESET)
-        elif line.strip().startswith('│') and line.strip().endswith('│'):
-            # Lines with border on both sides
-            print(CYAN + padded_line + RESET)
+        elif '8' in line:
+            # Lines with "8" text - make it cream
+            print(CREAM + padded_line + RESET)
         else:
-            # All text/content - make it white
-            print(WHITE + padded_line + RESET)
+            # All other lines (borders) - make it cyan
+            print(CYAN + padded_line + RESET)
 
 # Function to remove ANSI color codes for length calculation
 def strip_colors(text):
@@ -165,7 +163,7 @@ def main():
 
     for line in wrapped_lines:
      print(f"{' ' * border_padding}{CYAN}│{RESET} ", end="")
-     typewriter(f"{WHITE}{line:^{border_width-2}}{RESET}", delay=0.02)
+     typewriter(f"{WHITE}{line:^{border_width-2}}{RESET}", delay=0.023)
      print(f" {CYAN}│{RESET}")
 
     print(f"{' ' * border_padding}{CYAN}│{' ' * border_width}│{RESET}")
@@ -178,7 +176,7 @@ def main():
     print(" " * padding + GREEN + success_msg + RESET)
 
     # Wait and clear screen - CENTERED
-    welcome_msg = "WELCOME TO BIBLE TERMINAL EDITION! FOR MAIN MENU CLICK \"ENTER\""
+    welcome_msg = "WELCOME TO THE BIBLE (TERMINAL EDITION) FOR MAIN MENU CLICK \"ENTER\""
     terminal_width = 200
     welcome_padding = (terminal_width - len(welcome_msg)) // 2
     input(f"\n\n{' ' * welcome_padding}{YELLOW}{welcome_msg}{RESET}")
@@ -195,7 +193,7 @@ def main():
         show_main_menu_header()
 
         # Center the MAIN MENU header
-        terminal_width = 120
+        terminal_width = 100
         menu_header_lines = [
             "╔════════════════════════════╗",
             "║        MAIN  MENU          ║", 
@@ -231,7 +229,7 @@ def main():
 
         # Center the input prompt
         prompt_text = "Enter choice: "
-        terminal_width = 107
+        terminal_width = 85
         prompt_padding = (terminal_width - len(prompt_text)) // 2
         choice = input('\n' + " " * prompt_padding + prompt_text).strip()
 
