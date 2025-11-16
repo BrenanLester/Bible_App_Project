@@ -62,7 +62,8 @@ class BibleParserJSON:
             # build the hierarchical tree (dict of dicts)
             self.bible.setdefault(book_name, {}).setdefault(chapter, {})[verse] = text
 
-        print(f"✅ Bible loaded successfully! Books: {len(self.bible)}")
+        # REMOVE this line to avoid the duplicate message:
+        # print(f"✅ Bible loaded successfully! Books: {len(self.bible)}")
         return self.bible
 
     def get_verse(self, book, chapter, verse):
