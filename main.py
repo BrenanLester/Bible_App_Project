@@ -253,7 +253,6 @@ def main():
             search_interface(bible)
             
             # After search interface returns, go back to main menu
-            input(f"\n{GREEN}Press Enter to return to main menu...{RESET}")
             clear_screen()
 
         elif choice == "3":
