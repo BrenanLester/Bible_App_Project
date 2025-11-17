@@ -12,7 +12,7 @@ from ascii_art import HEADER_ART, MAIN_MENU_ART
 def typewriter(text, delay=1):
     for char in text:
         sys.stdout.write(char)
-        sys.stdout.flush()
+        sys.stdout.flush()  
         time.sleep(delay)
 
 def clear_screen():
@@ -23,11 +23,17 @@ def show_section_header(title):
     """Show header with a section title"""
     clear_screen()
     show_main_menu_header()
-    CYAN = "\033[96m"
+    CYAN = "\033[92m"
     RESET = "\033[0m"
-    print(CYAN + f"\n╔════════════════════════════╗")
-    print(f"║      {title:^16}       ║")
-    print(f"╚════════════════════════════╝" + RESET)
+    
+    # Set terminal width and center the header
+    terminal_width = 340
+    header_width = 40  # Width of your header box
+    border_padding = (terminal_width - header_width) // 2
+    
+    print(" " * border_padding + CYAN + f"╔════════════════════════════╗" + RESET)
+    print(" " * border_padding + CYAN + f"║         VERSION 0.1        ║" + RESET)
+    print(" " * border_padding + CYAN + f"╚════════════════════════════╝" + RESET)
 
 def show_landing_page():
     """Show landing page with intro ASCII art"""
@@ -163,7 +169,7 @@ def main():
 
     for line in wrapped_lines:
      print(f"{' ' * border_padding}{CYAN}│{RESET} ", end="")
-     typewriter(f"{WHITE}{line:^{border_width-2}}{RESET}", delay=0.023)
+     typewriter(f"{WHITE}{line:^{border_width-2}}{RESET}", delay=0.01)
      print(f" {CYAN}│{RESET}")
 
     print(f"{' ' * border_padding}{CYAN}│{' ' * border_width}│{RESET}")
@@ -255,21 +261,53 @@ def main():
             show_section_header("BOOKMARKS")
             view_bookmarks()
             try:
-                print(f"\n{CYAN}Options:{RESET}")
-                print(f"{GREEN}[1]{RESET} Remove a specific bookmark")
-                print(f"{GREEN}[2]{RESET} Clear ALL bookmarks")
-                print(f"{GREEN}[3]{RESET} Return to main menu")
+                # Center the options section
+                terminal_width = 214  # Set your desired width
                 
-                sub_choice = input(f"\n{YELLOW}Choose option (1-3): {RESET}").strip()
+                options = [
+                    f"{CYAN}Options:{RESET}",
+                    f"{GREEN}[1]{RESET} Remove a specific bookmark",
+                    f"{GREEN}[2]{RESET} Clear ALL bookmarks", 
+                    f"{GREEN}[3]{RESET} Return to main menu"
+                ]
                 
+                # Find the longest option length (without colors)
+                max_length = max(len(strip_colors(option)) for option in options)
+                
+                # Calculate padding for the entire block
+                block_padding = (terminal_width - max_length) // 2
+                
+                # Print all options with the same padding
+                print()  # Add space before options
+                for option in options:
+                    print(" " * block_padding + option)
+                
+           # Center the input prompt
+                # Center the input prompt
+                print()  # ← ADD BLANK LINE SEPARATELY
+                prompt_text = f"{YELLOW}Choose option (1-3): {RESET}"  # ← NO \n HERE
+                terminal_width = 206 # ← CHANGE THIS NUMBER TO ADJUST CENTERING
+                clean_prompt = strip_colors(prompt_text)
+                prompt_padding = (terminal_width - len(clean_prompt)) // 2
+                sub_choice = input(" " * prompt_padding + prompt_text).strip()
                 if sub_choice == "1":
                     try:
-                        num = int(input(f"{YELLOW}Enter bookmark number: {RESET}"))
+                        # Center the bookmark number prompt
+                        num_prompt = f"{YELLOW}Enter bookmark number: {RESET}"
+                        clean_num_prompt = strip_colors(num_prompt)
+                        num_padding = (terminal_width - len(clean_num_prompt)) // 2
+                        num = int(input(" " * num_padding + num_prompt))
                         remove_bookmark(num)
                     except ValueError:
-                        print(f"{RED}❌ Invalid input. Please enter a number.{RESET}")
+                        error_msg = f"{RED}❌ Invalid input. Please enter a number.{RESET}"
+                        clean_error = strip_colors(error_msg)
+                        error_padding = (terminal_width - len(clean_error)) // 2
+                        print(" " * error_padding + error_msg)
                     except Exception as e:
-                        print(f"{RED}❌ Error removing bookmark: {e}{RESET}")
+                        error_msg = f"{RED}❌ Error removing bookmark: {e}{RESET}"
+                        clean_error = strip_colors(error_msg)
+                        error_padding = (terminal_width - len(clean_error)) // 2
+                        print(" " * error_padding + error_msg)
                 
                 elif sub_choice == "2":
                     # Clear all bookmarks with confirmation
@@ -279,7 +317,10 @@ def main():
                 elif sub_choice == "3":
                     pass  # Return to main menu
                 else:
-                    print(f"{RED}❌ Invalid option.{RESET}")
+                    error_msg = f"{RED}❌ Invalid option.{RESET}"
+                    clean_error = strip_colors(error_msg)
+                    error_padding = (terminal_width - len(clean_error)) // 2
+                    print(" " * error_padding + error_msg)
             
             except Exception as e:
                 print(f"{RED}❌ Error in bookmarks menu: {e}{RESET}")
@@ -290,35 +331,55 @@ def main():
             show_section_header("SEARCH HISTORY")
             from history import SearchHistory
             history = SearchHistory()
-            history_items = history.list_all()
-
-            if history_items:
-                print("\nRecent searches:")
-                for i, query in enumerate(history_items, 1):
-                    print(f"{i}. {query}")
-
-                # === Ask to clear history AFTER listing ===
-                clear_choice = input("\nDo you want to CLEAR ALL history? (y/n): ").strip().lower()
-
+            
+            # Display history in table format, if there is any
+            history_exists = history.display_table()
+            
+            if history_exists:
+                # Only ask about clearing if there was 
+                terminal_width = 112
+                clear_prompt = "Do you want to CLEAR ALL history? (y/n): "
+                prompt_padding = (terminal_width - len(clear_prompt)) // 2
+                clear_choice = input(f"\n{' ' * prompt_padding}{YELLOW}{clear_prompt}{RESET}").strip().lower()
+                
                 if clear_choice == "y":
                     history.clear()
-                    print("\n✅ All search history has been cleared!")
+                    # Center success message
+                    terminal_width = 218
+                    success_msg = "✅ All search history has been cleared!"
+                    success_padding = (terminal_width - len(success_msg)) // 2
+                    print(f"\n{' ' * success_padding}{GREEN}{success_msg}{RESET}")
                 else:
-                    print("\n❎ History not cleared.")
-            else:
-                print("\nNo search history found.")
+                    # Center "not cleared" message
+                    terminal_width = 218
+                    not_cleared_msg = "History not cleared."
+                    not_cleared_padding = (terminal_width - len(not_cleared_msg)) // 2
+                    print(f"\n{' ' * not_cleared_padding}{YELLOW}{not_cleared_msg}{RESET}")
 
-            input(f"\n{GREEN}Press Enter to return to main menu...{RESET}")
+            # Center the "Press Enter" prompt
+            terminal_width = 210
+            enter_msg = "Press Enter to return to main menu..."
+            enter_padding = (terminal_width - len(enter_msg)) // 2
+            input(f"\n{' ' * enter_padding}{GREEN}{enter_msg}{RESET}")
             clear_screen()
+
 
         elif choice == "5":
             clear_screen()
             show_main_menu_header()
-            print(f"\n{GREEN}👋 Thank you for using Bible Terminal Edition! Goodbye!{RESET}")
+            # Center goodbye message
+            terminal_width = 166
+            goodbye_msg = "👋 Thank you for using Bible Terminal Edition! Goodbye!"
+            goodbye_padding = (terminal_width - len(goodbye_msg)) // 2
+            print(f"\n{' ' * goodbye_padding}{GREEN}{goodbye_msg}{RESET}")
             break
 
         else:
-            print("Invalid choice.")
+            # Center invalid choice message
+            terminal_width = 166
+            invalid_msg = "Invalid choice."
+            invalid_padding = (terminal_width - len(invalid_msg)) // 2
+            print(f"{' ' * invalid_padding}{YELLOW}{invalid_msg}{RESET}")
             time.sleep(1)
             clear_screen()
 
