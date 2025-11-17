@@ -165,62 +165,6 @@ def search_bible(bible, query):
 #            PAGINATED DISPLAY FUNCTIONS
 # ====================================================
 
-def show_paginated_results(found, words):
-    try:
-        total = len(found)
-        index = 0
-        results = []
-        current_page = 1
-
-        while index < total:
-            end = min(index + PAGE_SIZE, total)
-            total_pages = (total + PAGE_SIZE - 1) // PAGE_SIZE
-            
-            print(f"\n{CYAN}📄 Page {current_page} of {total_pages}{RESET}")
-            print(f"{CYAN}{'='*50}{RESET}\n")
-
-            for book, chap, verse, text, book_match in found[index:end]:
-                display_book = highlight_all(book, words) if book_match else book
-                display_chap = highlight_all(str(chap), words)
-                display_verse = highlight_all(str(verse), words)
-                display_text = highlight_all(text, words)
-
-                print(f"{CYAN}{display_book} {display_chap}:{display_verse}{RESET}")
-                print(display_text + "\n")
-
-                results.append((book, f"{chap}:{verse}", text))
-
-            index += PAGE_SIZE
-            current_page += 1
-
-            if index < total:
-                resp = input("\n🔽 Options \n [1] Next Page \n [2] Previous Page \n [3] Quit").lower()
-                try:
-                    if resp == '1' and index > PAGE_SIZE:
-                        index -= 2 * PAGE_SIZE
-                        current_page += 2
-                    elif resp == '2' and index > PAGE_SIZE:
-                        index -= 2 * PAGE_SIZE
-                        current_page -= 2
-                    else:
-                        print("Are you sure you want to quit? \n [1] Yes \n [2] No: ", end="")
-                        confirm = input()
-                        if confirm == '2':
-                            continue
-                        else:
-                            break
-                except:
-                    print(f"{RED}❌ Invalid option. Exiting.{RESET}")
-                    break
-            else:
-                print(f"{GREEN}✅ End of results.{RESET}\n")
-
-        return results
-
-    except Exception as e:
-        print(f"{RED}❌ Error displaying results: {e}{RESET}")
-        return None
-
 
 def show_paginated_results_with_bookmarking(found, words):
     total = len(found)
