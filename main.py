@@ -126,7 +126,7 @@ def main():
     CYAN = "\033[96m"
     YELLOW= "\033[93m"
     votd = verse_of_the_day(bible)
-    verse_text = f" {votd}"
+    verse_text = f"📖 {votd}"
 
     # Auto-adjust border width based on verse length
     max_width = 80  # Maximum terminal width
@@ -143,7 +143,7 @@ def main():
         current_line = []
         
         for word in words:
-            if len(' '.join(current_line + [word])) <= width - 3:  # -4 for border padding
+            if len(' '.join(current_line + [word])) <= width - 4:  # -4 for border padding
                 current_line.append(word)
             else:
                 if current_line:
@@ -169,7 +169,7 @@ def main():
 
     for line in wrapped_lines:
      print(f"{' ' * border_padding}{CYAN}│{RESET} ", end="")
-     typewriter(f"{WHITE}{line:^{border_width-2}}{RESET}", delay=0.03)
+     typewriter(f"{WHITE}{line:^{border_width-2}}{RESET}", delay=0.01)
      print(f" {CYAN}│{RESET}")
 
     print(f"{' ' * border_padding}{CYAN}│{' ' * border_width}│{RESET}")
@@ -284,43 +284,55 @@ def main():
                 
            # Center the input prompt
                 # Center the input prompt
-                print()  # ← ADD BLANK LINE SEPARATELY
-                prompt_text = f"{YELLOW}Choose option (1-3): {RESET}"  # ← NO \n HERE
-                terminal_width = 206 # ← CHANGE THIS NUMBER TO ADJUST CENTERING
+                print()  # blank line
+                prompt_text = f"{YELLOW}Choose option (1-3): {RESET}"
                 clean_prompt = strip_colors(prompt_text)
                 prompt_padding = (terminal_width - len(clean_prompt)) // 2
-                sub_choice = input(" " * prompt_padding + prompt_text).strip()
-                if sub_choice == "1":
-                    try:
-                        # Center the bookmark number prompt
-                        num_prompt = f"{YELLOW}Enter bookmark number: {RESET}"
+
+                # Loop until valid option selected
+                while True:
+                    sub_choice = input(" " * prompt_padding + prompt_text).strip()
+                    if sub_choice == "1":
+                        # remove specific bookmark - allow retry until valid or 'back'
+                        num_prompt = f"{YELLOW}Enter bookmark number (or 'back' to cancel): {RESET}"
                         clean_num_prompt = strip_colors(num_prompt)
                         num_padding = (terminal_width - len(clean_num_prompt)) // 2
-                        num = int(input(" " * num_padding + num_prompt))
-                        remove_bookmark(num)
-                    except ValueError:
-                        error_msg = f"{RED}❌ Invalid input. Please enter a number.{RESET}"
-                        clean_error = strip_colors(error_msg)
-                        error_padding = (terminal_width - len(clean_error)) // 2
-                        print(" " * error_padding + error_msg)
-                    except Exception as e:
-                        error_msg = f"{RED}❌ Error removing bookmark: {e}{RESET}"
-                        clean_error = strip_colors(error_msg)
-                        error_padding = (terminal_width - len(clean_error)) // 2
-                        print(" " * error_padding + error_msg)
-                
-                elif sub_choice == "2":
-                    # Clear all bookmarks with confirmation
-                    from bookmarks import clear_all_bookmarks
-                    clear_all_bookmarks()
-                
-                elif sub_choice == "3":
-                    pass  # Return to main menu
-                else:
-                    error_msg = f"{RED}❌ Invalid option.{RESET}"
-                    clean_error = strip_colors(error_msg)
-                    error_padding = (terminal_width - len(clean_error)) // 2
-                    print(" " * error_padding + error_msg)
+                        while True:
+                            num_input = input(" " * num_padding + num_prompt).strip()
+                            if num_input.lower() in ('back','b','cancel','c'):
+                                break  # back to options menu
+                            try:
+                                num = int(num_input)
+                                # call remove_bookmark; it returns True on success
+                                if remove_bookmark(num):
+                                    break  # removal ok -> back to options menu
+                                else:
+                                    # removal failed (out of range etc.) -> reprompt
+                                    err = f"{RED}❌ Removal failed. Try again or type 'back'.{RESET}"
+                                    print(" " * num_padding + err)
+                                    continue
+                            except ValueError:
+                                err = f"{RED}❌ Invalid input. Enter a number or 'back'.{RESET}"
+                                print(" " * num_padding + err)
+                                continue
+                        # after handling option 1, show options again
+                        continue
+
+                    elif sub_choice == "2":
+                        # Clear all bookmarks (confirmation handled in function)
+                        from bookmarks import clear_all_bookmarks
+                        clear_all_bookmarks()
+                        # after clearing, return to options (so user can choose again)
+                        continue
+
+                    elif sub_choice == "3":
+                        # Return to main menu
+                        break
+
+                    else:
+                        err_msg = f"{RED}❌ Invalid option. Choose 1, 2 or 3.{RESET}"
+                        print(" " * prompt_padding + err_msg)
+                        continue
             
             except Exception as e:
                 print(f"{RED}❌ Error in bookmarks menu: {e}{RESET}")
@@ -336,12 +348,17 @@ def main():
             history_exists = history.display_table()
             
             if history_exists:
-                # Only ask about clearing if there was 
+                # Only ask about clearing if there was
                 terminal_width = 112
                 clear_prompt = "Do you want to CLEAR ALL history? (y/n): "
                 prompt_padding = (terminal_width - len(clear_prompt)) // 2
-                clear_choice = input(f"\n{' ' * prompt_padding}{YELLOW}{clear_prompt}{RESET}").strip().lower()
-                
+                # Loop until valid y/n
+                while True:
+                    clear_choice = input(f"\n{' ' * prompt_padding}{YELLOW}{clear_prompt}{RESET}").strip().lower()
+                    if clear_choice in ("y", "n"):
+                        break
+                    print(f"\n{' ' * prompt_padding}{YELLOW}Please type 'y' or 'n'.{RESET}")
+
                 if clear_choice == "y":
                     history.clear()
                     # Center success message
@@ -358,7 +375,7 @@ def main():
 
             # Center the "Press Enter" prompt
             terminal_width = 210
-            enter_msg = " " + "Press Enter to return to main menu..."
+            enter_msg = "Press Enter to return to main menu..."
             enter_padding = (terminal_width - len(enter_msg)) // 2
             input(f"\n{' ' * enter_padding}{GREEN}{enter_msg}{RESET}")
             clear_screen()

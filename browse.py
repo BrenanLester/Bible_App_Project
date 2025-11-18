@@ -2,6 +2,8 @@
 from bookmarks import add_bookmark
 from ascii_art import BROWSE_ART
 import re
+import shutil
+import sys
 
 def strip_colors(text):
     """Remove ANSI color codes for length calculation."""
@@ -19,7 +21,6 @@ def browse_bible(bible, parser):
     GREEN = "\033[92m"
     YELLOW = "\033[93m"
     RESET = "\033[0m"
-    CREAM = "\033[38;5;223m"
     
     # Center ASCII art
     terminal_width = 220  # ← CHANGE THIS FOR ASCII ART
@@ -31,8 +32,7 @@ def browse_bible(bible, parser):
     
     # Center titles
     terminal_width = 210  # ← CHANGE THIS FOR TITLES
-    print(center_content(f"{CREAM}KJV VERSION OF THE BIBLE{RESET}", terminal_width))
-    print(" ")
+    print(center_content(f"{CYAN}KJV VERSION OF THE BIBLE{RESET}", terminal_width))
     print(center_content(f"{YELLOW}Type 'back' to go back or 'exit' to return to menu{RESET}", terminal_width))
     
     # Define all 66 Bible books in order
@@ -91,22 +91,24 @@ def browse_bible(bible, parser):
     print(center_content(f"{GREEN}[1]{RESET} Old Testament (39 books)", terminal_width))
     print(center_content(f"{GREEN}[2]{RESET} New Testament (27 books)", terminal_width))
     print(" ")
-    testament_choice = input(center_content(f"{YELLOW}Enter choice (1-2) or 'back': {RESET}", terminal_width)).strip()
-    
-    if testament_choice.lower() == 'back':
-        return
-    elif testament_choice.lower() == 'exit':
-        return True
-    
-    if testament_choice == "1":
-        available_books = [book for book in bible.keys() if book in all_books[:39]]
-        testament_name = "Old Testament"
-    elif testament_choice == "2":
-        available_books = [book for book in bible.keys() if book in all_books[39:]]
-        testament_name = "New Testament"
-    else:
-        print(center_content("❌ Invalid choice. Please enter 1 or 2.", terminal_width))
-        return
+    # Loop until valid testament choice, or back/exit
+    while True:
+        testament_choice = input(center_content(f"{YELLOW}Enter choice (1-2) or 'back': {RESET}", terminal_width)).strip()
+        if testament_choice.lower() == 'back':
+            return
+        if testament_choice.lower() == 'exit':
+            return True
+        if testament_choice == "1":
+            available_books = [book for book in bible.keys() if book in all_books[:39]]
+            testament_name = "Old Testament"
+            break
+        elif testament_choice == "2":
+            available_books = [book for book in bible.keys() if book in all_books[39:]]
+            testament_name = "New Testament"
+            break
+        else:
+            print(center_content("❌ Invalid choice. Please enter 1 or 2.", terminal_width))
+            continue
     
     # Testament header
     terminal_width = 220 # ← CHANGE THIS FOR TESTAMENT HEADER
@@ -141,21 +143,22 @@ def browse_bible(bible, parser):
     
     print(center_content(f"{CYAN}└────────────────────────────────────────────────────────────────┘{RESET}", terminal_width))
     print(" ")
-    book_choice = input(center_content(f"{YELLOW}Choose a book number (1-{len(available_books)}) or 'back': {RESET}", terminal_width)).strip()
-    
-    if book_choice.lower() == 'back':
-        return browse_bible(bible, parser)
-    elif book_choice.lower() == 'exit':
-        return True
-    
-    try:
-        book_index = int(book_choice)
-        if not (1 <= book_index <= len(available_books)):
-            print(center_content("❌ Invalid book number.", terminal_width))
-            return
-    except ValueError:
-        print(center_content("❌ Invalid input.", terminal_width))
-        return
+    # Prompt for book selection; re-prompt on invalid input
+    while True:
+        book_choice = input(center_content(f"{YELLOW}Choose a book number (1-{len(available_books)}) or 'back': {RESET}", terminal_width)).strip()
+        if book_choice.lower() == 'back':
+            return browse_bible(bible, parser)
+        if book_choice.lower() == 'exit':
+            return True
+        try:
+            book_index = int(book_choice)
+            if not (1 <= book_index <= len(available_books)):
+                print(center_content("❌ Invalid book number. Please try again.", terminal_width))
+                continue
+            break
+        except ValueError:
+            print(center_content("❌ Invalid input. Enter a number, 'back' or 'exit'.", terminal_width))
+            continue
 
     book_name = available_books[book_index - 1]
     chapters = list(bible[book_name].keys())
@@ -182,17 +185,19 @@ def browse_bible(bible, parser):
     if chapters_line:
         print(center_content(chapters_line, terminal_width))
     print(" ")
-    chapter_choice = input(center_content(f"{YELLOW}Enter chapter number or 'back': {RESET}", terminal_width)).strip()
-    
-    if chapter_choice.lower() == 'back':
-        return browse_bible(bible, parser)
-    elif chapter_choice.lower() == 'exit':
-        return True
-    
-    chapter = chapter_choice
-    if chapter not in bible[book_name]:
-        print(center_content("❌ Invalid chapter.", terminal_width))
-        return
+    # Prompt for chapter selection; re-prompt on invalid input
+    while True:
+        chapter_choice = input(center_content(f"{YELLOW}Enter chapter number or 'back': {RESET}", terminal_width)).strip()
+        if chapter_choice.lower() == 'back':
+            return browse_bible(bible, parser)
+        if chapter_choice.lower() == 'exit':
+            return True
+        if chapter_choice in bible[book_name]:
+            chapter = chapter_choice
+            break
+        else:
+            print(center_content("❌ Invalid chapter. Please try again.", terminal_width))
+            continue
 
     verses = bible[book_name][chapter]
 
@@ -229,17 +234,19 @@ def browse_bible(bible, parser):
     
     print(center_content(f"{CYAN}└─────────────────────────────────────────────────────────────┘{RESET}", terminal_width))
     print(" ")
-    verse_choice = input(center_content(f"{YELLOW}Enter verse number or 'back': {RESET}", terminal_width)).strip()
-    
-    if verse_choice.lower() == 'back':
-        return browse_bible(bible, parser)
-    elif verse_choice.lower() == 'exit':
-        return True
-    
-    verse = verse_choice
-    if verse not in verses:
-        print(center_content("❌ Invalid verse.", terminal_width))
-        return
+    # Prompt for verse selection; re-prompt on invalid input
+    while True:
+        verse_choice = input(center_content(f"{YELLOW}Enter verse number or 'back': {RESET}", terminal_width)).strip()
+        if verse_choice.lower() == 'back':
+            return browse_bible(bible, parser)
+        if verse_choice.lower() == 'exit':
+            return True
+        verse = verse_choice
+        if verse in verses:
+            break
+        else:
+            print(center_content("❌ Invalid verse. Please enter a valid verse number.", terminal_width))
+            continue
 
     # Display Verse Text
     WHITE = "\033[97m"
@@ -289,20 +296,40 @@ def browse_bible(bible, parser):
     for line in verse_lines:
         print(center_content(line, terminal_width))
 
-    # Bookmark question
-    terminal_width = 220  # ← CHANGE THIS FOR BOOKMARK PROMPT
-    bookmark_choice = input(center_content(f"\n{YELLOW}Bookmark this verse? (y/n/back): {RESET}", terminal_width)).strip().lower()
-    if bookmark_choice == 'back':
-        return browse_bible(bible, parser)
-    elif bookmark_choice == 'exit':
-        return True
-    elif bookmark_choice == 'y':
-        add_bookmark(book_name, f"{chapter}:{verse}", verse_text)
-        print(center_content(f"{GREEN}✅ Verse bookmarked!{RESET}", terminal_width))
-    
-    # Browse another question
-    another_choice = input(center_content(f"\n{YELLOW}Browse another verse? (y/n): {RESET}", terminal_width)).strip().lower()
-    if another_choice == 'y':
-        return browse_bible(bible, parser)
-    else:
-        return True
+    # Bookmark question - with input validation loop (centered prompt)
+    # Use the project's layout width (matches other sections)
+    terminal_width = 220
+    while True:
+        # Print the centered prompt first so the input cursor appears centered
+        sys.stdout.write(center_content(f"\n{YELLOW}Bookmark this verse? (y/n/back): {RESET}", terminal_width) + ' ')
+        sys.stdout.flush()
+        bookmark_choice = input().strip().lower()
+        if bookmark_choice == 'back':
+            return browse_bible(bible, parser)
+        elif bookmark_choice == 'exit':
+            return True
+        elif bookmark_choice == 'y':
+            add_bookmark(book_name, f"{chapter}:{verse}", verse_text)
+            print(center_content(f"{GREEN}✅ Verse bookmarked!{RESET}", terminal_width))
+            break
+        elif bookmark_choice == 'n':
+            break
+        else:
+            print(center_content(f"{YELLOW}❌ Invalid choice. Please enter 'y', 'n', or 'back'.{RESET}", terminal_width))
+            continue
+
+    # Browse another question - with input validation loop (centered prompt)
+    # Use the same layout width so prompts line up with the verse box
+    prompt_width = 220
+
+    while True:
+        sys.stdout.write(center_content(f"\n{YELLOW}Browse another verse? (y/n): {RESET}", prompt_width) + ' ')
+        sys.stdout.flush()
+        another_choice = input().strip().lower()
+        if another_choice == 'y':
+            return browse_bible(bible, parser)
+        elif another_choice == 'n':
+            return True
+        else:
+            print(center_content(f"{YELLOW}❌ Invalid choice. Please enter 'y' or 'n'.{RESET}", prompt_width))
+            continue
