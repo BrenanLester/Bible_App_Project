@@ -143,7 +143,7 @@ def main():
         current_line = []
         
         for word in words:
-            if len(' '.join(current_line + [word])) <= width - 4:  # -4 for border padding
+            if len(' '.join(current_line + [word])) <= width - 3:  # -3 for border padding
                 current_line.append(word)
             else:
                 if current_line:
@@ -169,7 +169,7 @@ def main():
 
     for line in wrapped_lines:
      print(f"{' ' * border_padding}{CYAN}│{RESET} ", end="")
-     typewriter(f"{WHITE}{line:^{border_width-2}}{RESET}", delay=0.01)
+     typewriter(f"{WHITE}{line:^{border_width-2}}{RESET}", delay=0.03)
      print(f" {CYAN}│{RESET}")
 
     print(f"{' ' * border_padding}{CYAN}│{' ' * border_width}│{RESET}")
@@ -261,7 +261,7 @@ def main():
             show_section_header("BOOKMARKS")
             view_bookmarks()
             try:
-                # Center the options section
+                # Center the options section with a box
                 terminal_width = 214  # Set your desired width
                 
                 options = [
@@ -274,13 +274,19 @@ def main():
                 # Find the longest option length (without colors)
                 max_length = max(len(strip_colors(option)) for option in options)
                 
-                # Calculate padding for the entire block
-                block_padding = (terminal_width - max_length) // 2
+                # Calculate padding for the entire block (with box margins)
+                box_width = max_length + 4  # Add padding for box sides
+                block_padding = (terminal_width - box_width) // 2
                 
-                # Print all options with the same padding
+                # Print box border and options
                 print()  # Add space before options
+                print(" " * block_padding + f"{CYAN}┌{'─' * (box_width - 2)}┐{RESET}")
                 for option in options:
-                    print(" " * block_padding + option)
+                    # Pad option to fill box width
+                    option_clean = strip_colors(option)
+                    pad_right = box_width - len(option_clean) - 2
+                    print(" " * block_padding + f"{CYAN}│{RESET} {option}{' ' * pad_right}{CYAN}│{RESET}")
+                print(" " * block_padding + f"{CYAN}└{'─' * (box_width - 2)}┘{RESET}")
                 
            # Center the input prompt
                 # Center the input prompt

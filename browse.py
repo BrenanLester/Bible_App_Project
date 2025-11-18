@@ -21,7 +21,7 @@ def browse_bible(bible, parser):
     GREEN = "\033[92m"
     YELLOW = "\033[93m"
     RESET = "\033[0m"
-    
+
     # Center ASCII art
     terminal_width = 220  # ← CHANGE THIS FOR ASCII ART
     lines = BROWSE_ART.split('\n')
@@ -29,12 +29,12 @@ def browse_bible(bible, parser):
         clean_line = strip_colors(line)
         padding = (terminal_width - len(clean_line)) // 2
         print(" " * padding + f"{CYAN}{line}{RESET}")
-    
+
     # Center titles
     terminal_width = 210  # ← CHANGE THIS FOR TITLES
     print(center_content(f"{CYAN}KJV VERSION OF THE BIBLE{RESET}", terminal_width))
     print(center_content(f"{YELLOW}Type 'back' to go back or 'exit' to return to menu{RESET}", terminal_width))
-    
+
     # Define all 66 Bible books in order
     all_books = [
         # Old Testament (39 books)
@@ -52,7 +52,7 @@ def browse_bible(bible, parser):
         'Philemon', 'Hebrews', 'James', '1 Peter', '2 Peter', '1 John', '2 John',
         '3 John', 'Jude', 'Revelation'
     ]
-    
+
     # Display all 66 books visualization
     terminal_width = 215 # ← CHANGE THIS FOR BOOKS GRID
     print(" ")
@@ -62,15 +62,15 @@ def browse_bible(bible, parser):
     print(" ")
     print(center_content(f"{YELLOW}Bible Books Overview:{RESET}", terminal_width))
     print(center_content(f"{CYAN}┌─────────────────────────────────────────────────────────────────────────┐{RESET}", terminal_width))
-    
+
     # Display books in 3-column grid
     total_books = len(all_books)
     columns = 3
     rows_needed = (total_books + columns - 1) // columns
-    
+
     for row in range(rows_needed):
         line = f"{CYAN}│{RESET}"
-        
+
         for col in range(columns):
             book_index = row + (col * rows_needed)
             if book_index < total_books:
@@ -78,12 +78,12 @@ def browse_bible(bible, parser):
                 line += f" {GREEN}[{book_index + 1:2d}]{RESET} {book_name:<18}"
             else:
                 line += " " * 25  # Space for empty column
-                
+
         line += f" {CYAN}│{RESET}"
         print(center_content(line, terminal_width))
-    
+
     print(center_content(f"{CYAN}└─────────────────────────────────────────────────────────────────────────┘{RESET}", terminal_width))
-    
+
     # Choose Testament
     terminal_width = 210  # ← CHANGE THIS FOR TESTAMENT CHOICE
     print(" ")
@@ -109,27 +109,27 @@ def browse_bible(bible, parser):
         else:
             print(center_content("❌ Invalid choice. Please enter 1 or 2.", terminal_width))
             continue
-    
+
     # Testament header
     terminal_width = 220 # ← CHANGE THIS FOR TESTAMENT HEADER
     print(" ")
     print(center_content(f"{CYAN}┌──────────────────────────────────┐{RESET}", terminal_width))
     print(center_content(f"{CYAN} │        {testament_name:^20}      │ {RESET}", terminal_width))
     print(center_content(f"{CYAN}└──────────────────────────────────┘{RESET}", terminal_width))
-    
+
     # Book selection grid
     terminal_width = 220  # ← CHANGE THIS FOR BOOK SELECTION
     print(" ")
     print(center_content(f"{YELLOW}Books:{RESET}", terminal_width))
     print(center_content(f"{CYAN}┌────────────────────────────────────────────────────────────────┐{RESET}", terminal_width))
-    
+
     total_books = len(available_books)
     columns = 3
     rows_needed = (total_books + columns - 1) // columns
-    
+
     for row in range(rows_needed):
         line = f"{CYAN}│{RESET}"
-        
+
         for col in range(columns):
             book_index = row + (col * rows_needed)
             if book_index < total_books:
@@ -137,10 +137,10 @@ def browse_bible(bible, parser):
                 line += f" {GREEN}[{book_index + 1:2d}]{RESET} {book_name:<15}"
             else:
                 line += " " * 22  # Space for empty column
-                
+
         line += f" {CYAN}│{RESET}"
         print(center_content(line, terminal_width))
-    
+
     print(center_content(f"{CYAN}└────────────────────────────────────────────────────────────────┘{RESET}", terminal_width))
     print(" ")
     # Prompt for book selection; re-prompt on invalid input
@@ -171,7 +171,7 @@ def browse_bible(bible, parser):
     print(center_content(f"{CYAN}└──────────────────────────────────┘{RESET}", terminal_width))
     print(" ")
     print(center_content(f"{YELLOW}Chapters:{RESET}", terminal_width))
-    
+
     # Center chapter numbers
     chapters_line = ""
     for i, ch in enumerate(chapters, 1):
@@ -181,7 +181,7 @@ def browse_bible(bible, parser):
             chapters_line = ""
         else:
             chapters_line += f"{GREEN}{ch}{RESET} "
-    
+
     if chapters_line:
         print(center_content(chapters_line, terminal_width))
     print(" ")
@@ -201,38 +201,24 @@ def browse_bible(bible, parser):
 
     verses = bible[book_name][chapter]
 
-    # Verse selection
+    # Verse selection (no box, matching chapters style)
     terminal_width = 220 # ← CHANGE THIS FOR VERSE SELECTION
-    title = f"Verses in {book_name} {chapter}"
-    border_length = len(title) + 16
-    print(" ")
-    print(center_content(f"{CYAN}┌{'─' * border_length}┐{RESET}", terminal_width))
-    print(center_content(f"{CYAN}│        {title}        │{RESET}", terminal_width))
-    print(center_content(f"{CYAN}└{'─' * border_length}┘{RESET}", terminal_width))
     print(" ")
     print(center_content(f"{YELLOW}Verses:{RESET}", terminal_width))
     verse_nums = list(verses.keys())
-    print(center_content(f"{CYAN}┌─────────────────────────────────────────────────────────────┐{RESET}", terminal_width))
     
-    total_verses = len(verse_nums)
-    columns = 4
-    rows_needed = (total_verses + columns - 1) // columns
+    # Display verses without box (matching chapters display)
+    verses_line = ""
+    for i, verse_num in enumerate(verse_nums, 1):
+        if i % 10 == 0 or i == len(verse_nums):
+            verses_line += f"{GREEN}{verse_num}{RESET}"
+            print(center_content(verses_line, terminal_width))
+            verses_line = ""
+        else:
+            verses_line += f"{GREEN}{verse_num}{RESET} "
     
-    for row in range(rows_needed):
-        line = f"{CYAN}│{RESET}"
-        
-        for col in range(columns):
-            verse_index = row + (col * rows_needed)
-            if verse_index < total_verses:
-                verse_num = verse_nums[verse_index]
-                line += f" {GREEN}{verse_num:>4}{RESET}"
-            else:
-                line += " " * 5
-                
-        line += " " * 40 + f" {CYAN}│{RESET}"
-        print(center_content(line, terminal_width))
-    
-    print(center_content(f"{CYAN}└─────────────────────────────────────────────────────────────┘{RESET}", terminal_width))
+    if verses_line:
+        print(center_content(verses_line, terminal_width))
     print(" ")
     # Prompt for verse selection; re-prompt on invalid input
     while True:
@@ -252,27 +238,27 @@ def browse_bible(bible, parser):
     WHITE = "\033[97m"
     CREAM = "\033[38;5;223m"
     verse_text = parser.get_verse(book_name, chapter, verse)
-    
+
     # Create a border around the verse
     verse_reference = f"{book_name} {chapter}:{verse}"
     max_line_width = max(len(verse_reference), len(verse_text))
     border_width = min(max_line_width + 4, 80)
-    
+
     # Center the verse box
     terminal_width = 220 # ← CHANGE THIS FOR VERSE DISPLAY
     verse_box = f"\n{WHITE}┌{'─' * border_width}┐{RESET}\n"
     verse_box += f"{WHITE}│{' ' * border_width}│{RESET}\n"
-    
+
     # Center the reference
     ref_padding = (border_width - len(verse_reference)) // 2
     verse_box += f"{WHITE}│{' ' * ref_padding}{GREEN}{verse_reference}{' ' * (border_width - len(verse_reference) - ref_padding)}{WHITE}│{RESET}\n"
     verse_box += f"{WHITE}│{' ' * border_width}│{RESET}\n"
-    
+
     # Wrap long verse text
     words = verse_text.split()
     lines = []
     current_line = []
-    
+
     for word in words:
         if len(' '.join(current_line + [word])) <= border_width - 4:
             current_line.append(word)
@@ -282,26 +268,24 @@ def browse_bible(bible, parser):
             current_line = [word]
     if current_line:
         lines.append(' '.join(current_line))
-    
+
     # Print each line of verse text
     for line in lines:
         line_padding = (border_width - len(line)) // 2
         verse_box += f"{WHITE}│{' ' * line_padding}{CREAM}{line}{' ' * (border_width - len(line) - line_padding)}{WHITE}│{RESET}\n"
-    
+
     verse_box += f"{WHITE}│{' ' * border_width}│{RESET}\n"
     verse_box += f"{WHITE}└{'─' * border_width}┘{RESET}"
-    
+
     # Center the entire verse box
     verse_lines = verse_box.split('\n')
     for line in verse_lines:
         print(center_content(line, terminal_width))
 
-    # Bookmark question - with input validation loop (centered prompt)
-    # Use the project's layout width (matches other sections)
+    # Bookmark question - aligned with verse display
     terminal_width = 220
     while True:
-        # Print the centered prompt first so the input cursor appears centered
-        sys.stdout.write(center_content(f"\n{YELLOW}Bookmark this verse? (y/n/back): {RESET}", terminal_width) + ' ')
+        print(center_content(f"\n{YELLOW}Bookmark this verse? (y/n/back): {RESET}", terminal_width), end='')
         sys.stdout.flush()
         bookmark_choice = input().strip().lower()
         if bookmark_choice == 'back':
@@ -318,12 +302,10 @@ def browse_bible(bible, parser):
             print(center_content(f"{YELLOW}❌ Invalid choice. Please enter 'y', 'n', or 'back'.{RESET}", terminal_width))
             continue
 
-    # Browse another question - with input validation loop (centered prompt)
-    # Use the same layout width so prompts line up with the verse box
+    # Browse another question - aligned with verse display
     prompt_width = 220
-
     while True:
-        sys.stdout.write(center_content(f"\n{YELLOW}Browse another verse? (y/n): {RESET}", prompt_width) + ' ')
+        print(center_content(f"\n{YELLOW}Browse another verse? (y/n): {RESET}", prompt_width), end='')
         sys.stdout.flush()
         another_choice = input().strip().lower()
         if another_choice == 'y':

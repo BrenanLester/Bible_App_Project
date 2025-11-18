@@ -1,7 +1,5 @@
 import json
 import os
-import os
-import json
 from collections import deque
 
 class SearchHistory:
