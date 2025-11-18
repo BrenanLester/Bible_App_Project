@@ -169,7 +169,7 @@ def main():
 
     for line in wrapped_lines:
      print(f"{' ' * border_padding}{CYAN}│{RESET} ", end="")
-     typewriter(f"{WHITE}{line:^{border_width-2}}{RESET}", delay=0.05)
+     typewriter(f"{WHITE}{line:^{border_width-2}}{RESET}", delay=0.03)
      print(f" {CYAN}│{RESET}")
 
     print(f"{' ' * border_padding}{CYAN}│{' ' * border_width}│{RESET}")
