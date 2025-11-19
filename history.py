@@ -88,7 +88,7 @@ class SearchHistory:
         print(f"{' ' * border_padding}{CYAN}├{'─' * 146}┤{RESET}")
 
         # Print history items from JSON data
-        for i, query in enumerate(history_items, 1):
+        for i, query in enumerate(reversed(history_items), 1):
             # Truncate long queries to fit table
             display_query = query if len(query) <= 138 else query[:135] + "..."
             print(f"{' ' * border_padding}{CYAN}│{RESET}{GREEN} {i:<4}{CREAM}│ {display_query:<139}{RESET}{CYAN}│{RESET}")

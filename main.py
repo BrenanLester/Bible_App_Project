@@ -126,7 +126,7 @@ def main():
     CYAN = "\033[96m"
     YELLOW= "\033[93m"
     votd = verse_of_the_day(bible)
-    verse_text = f"📖 {votd}"
+    verse_text = f" {votd}"
 
     # Auto-adjust border width based on verse length
     max_width = 80  # Maximum terminal width

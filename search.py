@@ -69,12 +69,12 @@ def add_to_search_history(query):
     history.add(query)
 
 def strip_colors(text):
-    """Remove ANSI color codes for length calculation."""
+    """Strip ANSI color codes for length calculations."""
     ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
     return ansi_escape.sub('', text)
 
 def center_content(content, terminal_width):
-    """Center content with specified terminal width."""
+    """Center content given terminal width."""
     clean_content = strip_colors(content)
     padding = (terminal_width - len(clean_content)) // 2
     return " " * max(0, padding) + content
@@ -183,6 +183,7 @@ def show_paginated_results_with_bookmarking(found, words):
 
     while index < total:
         end = min(index + PAGE_SIZE, total)
+
         # Center page header
         terminal_width_header = 200  # ← CHANGE THIS FOR PAGE HEADER
         print(" ")
@@ -191,9 +192,9 @@ def show_paginated_results_with_bookmarking(found, words):
         print(center_content(f"{page_header}", terminal_width_header))
 
         # Center verse references
-        terminal_width_verses = 20 # ← CHANGE THIS FOR VERSE REFERENCES
+        terminal_width_verses = 10 # ← CHANGE THIS FOR VERSE REFERENCES
         # Center verse text  
-        terminal_width_text = 45# ← CHANGE THIS FOR VERSE TEXT
+        terminal_width_text = 40# ← CHANGE THIS FOR VERSE TEXT
 
         for i, (book, chap, verse, text, book_match) in enumerate(found[index:end], index + 1):
             display_book = highlight_all(book, words) if book_match else book
@@ -214,7 +215,8 @@ def show_paginated_results_with_bookmarking(found, words):
         options_box += f"{CYAN}     │{RESET}   {GREEN}[1] ➤{RESET}{CREAM} Next Page{RESET}                             {CYAN}│{RESET}\n"
         options_box += f"{CYAN}     │{RESET}   {GREEN}[2] ➤{RESET}{CREAM} Previous Page{RESET}                         {CYAN}│{RESET}\n"
         options_box += f"{CYAN}     │{RESET}   {YELLOW}[3] ➤{RESET}{CREAM} Bookmark{RESET}                              {CYAN}│{RESET}\n"
-        options_box += f"{CYAN}     │{RESET}   {RED}[4] ➤{RESET}{CREAM} Exit to Menu{RESET}                          {CYAN}│{RESET}\n"
+        options_box += f"{CYAN}     │{RESET}   {YELLOW}[4] ➤{RESET}{CREAM} Search Again{RESET}                          {CYAN}│{RESET}\n"
+        options_box += f"{CYAN}     │{RESET}   {RED}[5] ➤{RESET}{CREAM} Exit to Menu{RESET}                          {CYAN}│{RESET}\n"
         options_box += f"{CYAN}     │{RESET}                                               {CYAN}│{RESET}\n"
         options_box += f"{CYAN}     └───────────────────────────────────────────────┘{RESET}"
 
@@ -226,8 +228,11 @@ def show_paginated_results_with_bookmarking(found, words):
         # Center input prompt
         terminal_width_input = 176  # ← CHANGE THIS FOR INPUT PROMPT
         action = input(center_content("Select an option: ", terminal_width_input)).lower()
-
-        if action == '3':
+        if action == '4':
+            return "search_again"
+        elif action == '5':
+            return True
+        elif action == '3':
             try:
                 sel_prompt = "Enter number to bookmark: "
                 sel = int(input(center_content(sel_prompt, terminal_width_input)))
@@ -265,9 +270,6 @@ def show_paginated_results_with_bookmarking(found, words):
         # ============================
         # EXIT
         # ============================
-        elif action == '4':
-            return True
-
         else:
             terminal_width_NAH= 190
             print(center_content("❌ Invalid option.", terminal_width_NAH))
@@ -285,7 +287,6 @@ def search_interface(bible):
     RED    = "\033[91m"
     RESET  = "\033[0m"
     CREAM = "\033[38;5;223m"
-
     # Center ASCII art
     terminal_width = 218 # ← CHANGE THIS FOR ASCII ART
     lines = SEARCH_ART.split('\n')
@@ -296,41 +297,50 @@ def search_interface(bible):
     
     # Center titles and menu
     terminal_width = 210  # ← CHANGE THIS FOR MAIN INTERFACE
-    terminal_width2 = 208  # ← CHANGE THIS FOR MAIN INTERFACE
-    terminal_wide = 208  # ← CHANGE THIS FOR MAIN 
- 
+    terminal_width2 = 211
+    terminal_width3 = 188 
+    terminal_wide = 208  
+   
     print(" ")
-    print(center_content(f"{CREAM}Bible Search — KJV Edition{RESET}", terminal_width))
+    print(center_content(f"{GREEN}Bible Search — KJV Edition{RESET}", terminal_width))
     print(" ")
-    print(center_content(f"{YELLOW}Search keywords, book names, or exact references.{RESET}", terminal_wide))
+    print(center_content(f"{CREAM}Search keywords, book names, or exact references.{RESET}", terminal_wide))
     print(" ")
-    print(center_content(f"{GREEN}[1] Search{RESET}", terminal_width))
-    print(center_content(f"{RED}[2] Exit{RESET}", terminal_width2))
+    print(" ")
+    print(" ")
+    print(center_content(f"{GREEN}Search [1]{RESET}", terminal_width))
+    print(" ")
+    print(center_content(f"{RED}Back  [2]{RESET}", terminal_width2))
     print(" ")
 
     while True:   # OUTER MENU LOOP
-        choice = input(center_content("Select an option: ", terminal_width))
+        choice = input(center_content(f"{YELLOW}SELECT OPTION  {CYAN}➤   {RESET}{RESET}", terminal_width3))
 
         if choice == '2':
-            print(center_content("Exiting search. Goodbye!", terminal_width))
+            print(center_content(f"{RED}Exiting search. Goodbye!", terminal_width3))
             return False
 
+        if choice != '1':
+            print(center_content("❌ Invalid option. Please enter 1 or 2.", terminal_width3))
+            continue
+
         # =============================
-        # INNER SEARCH LOOP
-        # Keeps asking until results exist
+        # INNER SEARCH-SESSION LOOP
+        # Runs the search prompt and shows results; if user selects
+        # "search again" we loop back to the search prompt directly.
         # =============================
         while True:
             # Center search prompt
-            terminal_width_search = 211 
-            terminal_width_messages = 182  # ← CHANGE THIS FOR MESSAGES
-            terminal_width_ARROW = 188  
+            terminal_width_prompt = 200 # ← CHANGE THIS FOR SEARCH PROMPT
+            terminal_width_messages = 172  # ← CHANGE THIS FOR MESSAGES
+            terminal_width_ARROW = 147  # ← CHANGE THIS FOR MESSAGES
             
             # Box lines
-            box_top = f"{GREEN}┌────── SEARCH 🔍 ──────┐{RESET}"
-            box_bottom = f"{GREEN} └───────────────────────┘{RESET}"
+            box_top = f"{GREEN}┌─SEARCH 🔍──────────────────────────────────────────────┐{RESET}"
+            box_bottom = f"{GREEN} └────────────────────────────────────────────────────────┘{RESET}"
 
             # Center each line individually
-            print(center_content(box_top, terminal_width_search))
+            print(center_content(box_top, terminal_width_prompt))
 
             # Your existing prompt
             query = prompt(
@@ -338,7 +348,8 @@ def search_interface(bible):
                 placeholder='Type your search...',
                 style=style
             ).strip()
-            print(center_content(box_bottom, terminal_width_search))
+
+            print(center_content(box_bottom, terminal_width_prompt))
 
             if not is_valid_reference(query):
                 print(center_content("❌ Invalid input.\n", terminal_width_messages))
@@ -347,20 +358,25 @@ def search_interface(bible):
             add_to_search_history(query)
             results = search_bible(bible, query)
 
-            if results:
-                break  # success → exit search loop
-            else:
+            if not results:
                 print(center_content("❌ No results found. Try again.\n", terminal_width_messages))
+                continue  # stay in the inner search loop
 
-        # =============================
-        # SHOW RESULTS
-        # =============================
-        words = query.lower().split()
-        should_exit_search = show_paginated_results_with_bookmarking(results, words)
+            # =============================
+            # SHOW RESULTS
+            # =============================
+            words = query.lower().split()
+            result_flag = show_paginated_results_with_bookmarking(results, words)
 
-        # If user selected "Exit to Menu", break out of search loop but stay in search interface
-        if should_exit_search:
-            break  # ← This breaks out of the search loop but stays in the search interface
+            if result_flag == "search_again":
+                # loop back to the inner search prompt immediately
+                continue
+            elif result_flag:
+                # exit the search interface and return to main menu
+                return True
+            else:
+                # any other falsey result → exit the search interface
+                return False
 
 # ====================================================
 #             STANDALONE TEST MODE
